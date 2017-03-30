@@ -1,0 +1,23 @@
+#version 330 core
+
+// Input vertex data, different for all executions of this shader.
+layout(location = 0) in vec3 vertexPosition;
+uniform float offset;
+
+void main(){
+	vec3 newPosition;
+    gl_Position.xyz = vertexPosition;
+	gl_Position.w = 1.0f;
+	
+	if(vertexPosition.x < 0 && vertexPosition.y < 0){
+		newPosition.x = -0.5 - offset;
+		//vertexPosition.x - (vertexPosition.x - (vertexPosition.x - offset)) / ((vertexPosition.x + offset) - (vertexPosition.x - offset));
+		gl_Position.xyz = newPosition;
+	}else if(vertexPosition.x > 0 && vertexPosition.y < 0){
+		newPosition.x = 0.5f + offset;
+		//vertexPosition.x + (vertexPosition.x - (vertexPosition.x - offset)) / ((vertexPosition.x + offset) - (vertexPosition.x - offset));
+		gl_Position.xyz = newPosition;
+
+	}
+}
+
