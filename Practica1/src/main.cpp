@@ -11,18 +11,16 @@ using namespace std;
 
 const GLint WIDTH = 800, HEIGHT = 600;
 const int floatsPerPosition = 3;
-const int numVertices = 4;
-const int sizeOfPositions = sizeof(float) * numVertices * floatsPerPosition;
 bool WIREFRAME = false;
 const int numIndices = 6;
 const int sizeOfIndices = sizeof(int) * numIndices;
 // Positions of vertices on CPU
 GLfloat VertexBufferObject[] = {
-	//geometry				
-	  0.5f,  0.5f, 0.0f, 
-	  0.5f, -0.5f, 0.0f, 
-	 -0.5f, -0.5f, 0.0f, 
-	 -0.5f, 0.5f, 0.0f,
+	//geometry				//colors
+	  0.5f,  0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
+	  0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
+	 -0.5f, -0.5f, 0.0f,	0.0f, 0.0f, 1.0f,
+	 -0.5f, 0.5f, 0.0f,		1.0f, 1.0f, 0.0f
 };
 
 // Indexes on CPU
@@ -108,13 +106,18 @@ int main() {
 	glGenBuffers(1, &vbo); // Create new VBO
 	glBindBuffer(GL_ARRAY_BUFFER, vbo); // Bind vbo as current vertex buffer
 										 // initialize vertex buffer, allocate memory, fill it with data
-	glBufferData(GL_ARRAY_BUFFER, sizeOfPositions, VertexBufferObject, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferObject), VertexBufferObject, GL_STATIC_DRAW);
 	
 	// indicate how vertex attribute 0 should interpret data in connected VBO
-	glVertexAttribPointer(0, floatsPerPosition, GL_FLOAT, GL_FALSE, 0, 0);
+	glVertexAttribPointer(0, floatsPerPosition, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), 0);
 
 	// indicate that current VBO should be used with vertex attribute with index 0
 	glEnableVertexAttribArray(0);
+
+	//color
+	glVertexAttribPointer(1, floatsPerPosition, GL_FLOAT, GL_FALSE, 6 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+	glEnableVertexAttribArray(1);
+
 
 	// Create new buffer that will be used to store indices
 	glGenBuffers(1, &ebo);
