@@ -27,4 +27,12 @@
       <Filter>Archivos de encabezado</Filter>
     </ClInclude>
   </ItemGroup>
+  <ItemGroup>
+    <Image Include="src\texture.png">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+    <Image Include="src\img.jpg">
+      <Filter>Archivos de recursos</Filter>
+    </Image>
+  </ItemGroup>
 </Project>
