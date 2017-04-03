@@ -2,11 +2,12 @@
 
 // Ouput data
 out vec3 color;
+in vec3 frag_color;
+
 
 void main()
 {
 
-	// Output color = red 
-	color = vec3(0,1,0);
+	color = frag_color;
 
 }

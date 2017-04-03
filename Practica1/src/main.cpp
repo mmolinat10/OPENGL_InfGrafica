@@ -17,10 +17,10 @@ const int sizeOfIndices = sizeof(int) * numIndices;
 // Positions of vertices on CPU
 GLfloat VertexBufferObject[] = {
 	//geometry				//colors
-	  0.5f,  0.5f, 0.0f,	1.0f, 0.0f, 0.0f,
+	  0.5f,  0.5f, 0.0f,	0.0f, 0.6f, 0.5f,
 	  0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
-	 -0.5f, -0.5f, 0.0f,	0.0f, 0.0f, 1.0f,
-	 -0.5f, 0.5f, 0.0f,		1.0f, 1.0f, 0.0f
+	 -0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,
+	 -0.5f, 0.5f, 0.0f,		0.0f, 0.6f, 0.5f
 };
 
 // Indexes on CPU

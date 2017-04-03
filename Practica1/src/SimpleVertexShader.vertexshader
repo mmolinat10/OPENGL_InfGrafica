@@ -2,12 +2,16 @@
 
 // Input vertex data, different for all executions of this shader.
 layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexColor;
 uniform float offset;
+//Out values
+out vec3 frag_color;
 
 void main(){
 	vec3 newPosition;
     gl_Position.xyz = vertexPosition;
 	gl_Position.w = 1.0f;
+	
 	
 	if(vertexPosition.x < 0 && vertexPosition.y < 0){
 		newPosition.x = -0.5 - offset;
@@ -19,5 +23,7 @@ void main(){
 		gl_Position.xyz = newPosition;
 
 	}
+
+	frag_color = vertexColor;
 }
 
