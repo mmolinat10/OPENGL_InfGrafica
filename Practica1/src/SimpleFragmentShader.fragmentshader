@@ -3,11 +3,12 @@
 // Ouput data
 out vec3 color;
 in vec3 frag_color;
-
+in vec3 newPosition;
 
 void main()
 {
-
-	color = frag_color;
+	
+	//color = frag_color;
+	color = vec3(abs(newPosition.x), 1 - abs(newPosition.x), 0, );
 
 }
