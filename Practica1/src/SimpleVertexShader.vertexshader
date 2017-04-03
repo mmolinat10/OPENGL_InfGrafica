@@ -6,22 +6,19 @@ layout(location = 1) in vec3 vertexColor;
 uniform float offset;
 //Out values
 out vec3 frag_color;
-out vec3 frag_position;
 out vec3 newPosition;
 
 void main(){
-	
+	newPosition = vertexPosition;
     gl_Position.xyz = vertexPosition;
 	gl_Position.w = 1.0f;
 	
 	
 	if(vertexPosition.x < 0 && vertexPosition.y < 0){
 		newPosition.x = -0.5 - offset;
-		//vertexPosition.x - (vertexPosition.x - (vertexPosition.x - offset)) / ((vertexPosition.x + offset) - (vertexPosition.x - offset));
 		gl_Position.xyz = newPosition;
 	}else if(vertexPosition.x > 0 && vertexPosition.y < 0){
 		newPosition.x = 0.5f + offset;
-		//vertexPosition.x + (vertexPosition.x - (vertexPosition.x - offset)) / ((vertexPosition.x + offset) - (vertexPosition.x - offset));
 		gl_Position.xyz = newPosition;
 
 	}

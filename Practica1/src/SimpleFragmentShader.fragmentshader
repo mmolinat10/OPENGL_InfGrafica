@@ -9,6 +9,6 @@ void main()
 {
 	
 	//color = frag_color;
-	color = vec3(abs(newPosition.x), 1 - abs(newPosition.x), 0, );
+	color = vec3(abs(newPosition.x), 1 - abs(newPosition.x), 0);
 
 }
