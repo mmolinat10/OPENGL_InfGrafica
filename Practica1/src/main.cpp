@@ -15,8 +15,7 @@ const int floatsPerPosition = 3;
 bool WIREFRAME = false;
 const int numIndices = 6;
 const int sizeOfIndices = sizeof(int) * numIndices;
-GLuint texture;
-int widthImage = 512, heightImage = 512;
+
 
 // Positions of vertices on CPU
 GLfloat VertexBufferObject[] = {
@@ -98,61 +97,60 @@ int main() {
 
 	Shader shad = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 	GLuint vao, vbo, ebo;
-	
+	GLuint textureID1, textureID2;
 	//cargamos los shader
 
 	//practica wireframe
 	glGenVertexArrays(1, &vao); // Create new VAO
-								// Binded VAO will store connections between VBOs and attributes
-	glBindVertexArray(vao);
-
+								
 	glGenBuffers(1, &vbo); // Create new VBO
-	glBindBuffer(GL_ARRAY_BUFFER, vbo); // Bind vbo as current vertex buffer
-										 // initialize vertex buffer, allocate memory, fill it with data
-	glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferObject), VertexBufferObject, GL_STATIC_DRAW);
+						   // Create new buffer that will be used to store indices
+	glGenBuffers(1, &ebo);
+							//texture
+	glGenTextures(1, &textureID1);
+	glGenTextures(1, &textureID2);
+
+	glBindVertexArray(vao); {// Binded VAO will store connections between VBOs and attributes
+		glBindBuffer(GL_ARRAY_BUFFER, vbo); // Bind vbo as current vertex buffer
+											// initialize vertex buffer, allocate memory, fill it with data
+		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferObject), VertexBufferObject, GL_STATIC_DRAW);
+		// Bind index buffer to corresponding target
+		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
+		// ititialize index buffer, allocate memory, fill it with data
+		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeOfIndices, indices, GL_STATIC_DRAW);
+		// indicate that current VBO should be used with vertex attribute with index 0
+		glEnableVertexAttribArray(0);
+		// indicate how vertex attribute 0 should interpret data in connected VBO
+		glVertexAttribPointer(0, floatsPerPosition, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+		/*color
+		glEnableVertexAttribArray(1);
+		glVertexAttribPointer(1, floatsPerPosition, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
+		*/
+		glEnableVertexAttribArray(2);
+		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+	}glBindVertexArray(0);
 	
-	// indicate how vertex attribute 0 should interpret data in connected VBO
-	glVertexAttribPointer(0, floatsPerPosition, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), 0);
+	int width, height;
 
-	// indicate that current VBO should be used with vertex attribute with index 0
-	glEnableVertexAttribArray(0);
+	// Load and generate the texture
+	unsigned char* image1 = SOIL_load_image("./src/texture.png", &width, &height, 0, SOIL_LOAD_RGB);
+	unsigned char* image2 = SOIL_load_image("./src/img.png", &width, &height, 0, SOIL_LOAD_RGB);
+	// Assign texture to ID
+	glBindTexture(GL_TEXTURE_2D, textureID1);
+	glBindTexture(GL_TEXTURE_2D, textureID2);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image1);
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
+	glGenerateMipmap(GL_TEXTURE_2D);
 
-	/*color
-	glVertexAttribPointer(1, floatsPerPosition, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(1);*/
-
-	//texture
-	glGenTextures(1, &texture);
-	glBindTexture(GL_TEXTURE_2D, texture);
-	// Set the texture wrapping/filtering
+	// Set the texture wrapping/filtering and parameters
 	float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
 
 	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
 	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-
-	// Load and generate the texture
-	unsigned char* image = SOIL_load_image("./src/texture.png", &widthImage, &heightImage, 0, SOIL_LOAD_RGB);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, widthImage, heightImage, 0, GL_RGB, GL_UNSIGNED_BYTE, image);
-	SOIL_free_image_data(image);
 	glBindTexture(GL_TEXTURE_2D, 0);
-
-	glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
-	glEnableVertexAttribArray(2);
+	SOIL_free_image_data(image1);
+	SOIL_free_image_data(image2);
 	
-	
-	//end texture..
-
-	// Create new buffer that will be used to store indices
-	glGenBuffers(1, &ebo);
-	// Bind index buffer to corresponding target
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-	// ititialize index buffer, allocate memory, fill it with data
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeOfIndices, indices, GL_STATIC_DRAW);
-
-	
-
-
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
 	{	
@@ -177,16 +175,22 @@ int main() {
 		glCullFace(GL_BACK);
 		////GL_CW sentido horario, GL_CCW sentido antihorario
 		glFrontFace(GL_CCW);
-		glActiveTexture(GL_TEXTURE0);
-		glBindTexture(GL_TEXTURE_2D, texture);
-		//establecer el shader
-		shad.USE();
 
-		//uniform variable
-		//GLint variableShader = glGetUniformLocation(shad.Program, "offset");
-		//glUniform1f(variableShader, abs(sin(glfwGetTime())) * 0.5f);
-		GLint variableShader = glGetUniformLocation(shad.Program, "ourTexture");
-		glUniform1i(variableShader, 0);
+
+		glActiveTexture(GL_TEXTURE0);
+
+		glUniform1f(glGetUniformLocation(shad.Program, "texture1"), 0);
+
+		glBindTexture(GL_TEXTURE_2D, textureID1);
+
+		glActiveTexture(GL_TEXTURE1);
+
+		glUniform1f(glGetUniformLocation(shad.Program, "texture2"), 1);
+
+		glBindTexture(GL_TEXTURE_2D, textureID2);
+
+		//establecer el shader
+		shad.USE();	
 
 		glBindVertexArray(vao);
 
