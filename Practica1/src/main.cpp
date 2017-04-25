@@ -24,11 +24,11 @@ const int sizeOfIndices = sizeof(int) * numIndices;
 GLuint textures[2];
 float mixOp;
 bool fade = false;
-mat4 matrix;
 GLint locTex1;
 GLint locTex2;
 GLint mixID;
 GLint matrixID;
+uint directionRotate;
 
 
 // Positions of vertices on CPU
@@ -74,6 +74,13 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 	else if (key == GLFW_KEY_DOWN&&action == GLFW_PRESS) {
 		fade = false;
+	}
+
+	if (key == GLFW_KEY_LEFT&&action == GLFW_PRESS) {
+		directionRotate = 1;
+	}
+	else if (key == GLFW_KEY_RIGHT&&action == GLFW_PRESS) {
+		directionRotate = 2;
 	}
 }
 
@@ -213,11 +220,14 @@ int main() {
 		glMatrixMode(GL_MODELVIEW);
 		glLoadIdentity();
 
+		/*
+		temporalmente desactivado a partir de la practica de transformaciones para ver la textura al escalar en Y negativa y Y positiva
 		////activar el culling
 		glEnable(GL_CULL_FACE);
 		glCullFace(GL_BACK);
 		////GL_CW sentido horario, GL_CCW sentido antihorario
 		glFrontFace(GL_CCW);
+		*/
 
 		locTex1 = glGetUniformLocation(shad.Program, "texture1");
 		locTex2 = glGetUniformLocation(shad.Program, "texture2");
@@ -257,10 +267,18 @@ int main() {
 				mixOp -= 0.01f;
 			}
 		}
-
-		//orden: primero escalar, luego rotar y por último trasladar
-		matrix = scale(matrix, vec3(0.5f, -0.5f, 0.0f));
+		mat4 matrix;
+		//en opengl el orden es: primero trasladar, luego rotar y por último scalar
 		matrix = translate(matrix, vec3(0.5f, 0.5f, 0));
+		if (directionRotate == 1) {
+			matrix = rotate(matrix, (GLfloat)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		}
+		else if(directionRotate == 2) {
+			matrix = rotate(matrix, (GLfloat)glfwGetTime() * glm::radians(-50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
+		}
+		
+		matrix = scale(matrix, vec3(0.5f, -0.5f, 0.0f));
+		
 
 		glUniformMatrix4fv(matrixID, 1, GL_FALSE, value_ptr(matrix));
 
