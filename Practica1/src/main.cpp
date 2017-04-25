@@ -15,6 +15,9 @@ const int floatsPerPosition = 3;
 bool WIREFRAME = false;
 const int numIndices = 6;
 const int sizeOfIndices = sizeof(int) * numIndices;
+GLuint textures[2];
+float mixOp;
+bool fade = false;
 
 
 // Positions of vertices on CPU
@@ -54,9 +57,17 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	else if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == true) {
 		WIREFRAME = false;
 	}
+
+	if (key == GLFW_KEY_UP&&action == GLFW_PRESS) {
+		fade = true;
+	}
+	else if (key == GLFW_KEY_DOWN&&action == GLFW_PRESS) {
+		fade = false;
+	}
 }
 
 int main() {
+	mixOp = 0.0f;
 
 	glfwSetErrorCallback(error_callback);
 
@@ -97,7 +108,7 @@ int main() {
 
 	Shader shad = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
 	GLuint vao, vbo, ebo;
-	GLuint textureID1, textureID2;
+	
 	//cargamos los shader
 
 	//practica wireframe
@@ -106,9 +117,7 @@ int main() {
 	glGenBuffers(1, &vbo); // Create new VBO
 						   // Create new buffer that will be used to store indices
 	glGenBuffers(1, &ebo);
-							//texture
-	glGenTextures(1, &textureID1);
-	glGenTextures(1, &textureID2);
+			
 
 	glBindVertexArray(vao); {// Binded VAO will store connections between VBOs and attributes
 		glBindBuffer(GL_ARRAY_BUFFER, vbo); // Bind vbo as current vertex buffer
@@ -128,28 +137,51 @@ int main() {
 		*/
 		glEnableVertexAttribArray(2);
 		glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, 8 * sizeof(GLfloat), (GLvoid*)(6 * sizeof(GLfloat)));
+
+		glBindBuffer(GL_ARRAY_BUFFER, 0);
 	}glBindVertexArray(0);
 	
-	int width, height;
+	int width, height, width2, height2;
+	unsigned char* image1;
+	unsigned char* image2;
+	
+	//texture
+	glGenTextures(2, textures);
+
+	// Assign texture to ID
+	glBindTexture(GL_TEXTURE_2D, textures[0]);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
 	// Load and generate the texture
-	unsigned char* image1 = SOIL_load_image("./src/texture.png", &width, &height, 0, SOIL_LOAD_RGB);
-	unsigned char* image2 = SOIL_load_image("./src/img.png", &width, &height, 0, SOIL_LOAD_RGB);
-	// Assign texture to ID
-	glBindTexture(GL_TEXTURE_2D, textureID1);
-	glBindTexture(GL_TEXTURE_2D, textureID2);
+	image1 = SOIL_load_image("./src/texture.png", &width, &height, 0, SOIL_LOAD_RGB);
+
 	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image1);
-	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
-	glGenerateMipmap(GL_TEXTURE_2D);
 
-	// Set the texture wrapping/filtering and parameters
-	float borderColor[] = { 1.0f, 1.0f, 0.0f, 1.0f };
-
-	glTexParameterfv(GL_TEXTURE_2D, GL_TEXTURE_BORDER_COLOR, borderColor);
-	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	glBindTexture(GL_TEXTURE_2D, 0);
 	SOIL_free_image_data(image1);
+
+	// Assign texture to ID
+	glBindTexture(GL_TEXTURE_2D, textures[1]);
+
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_MIRRORED_REPEAT);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+
+	// Load and generate the texture
+	image2 = SOIL_load_image("./src/img.png", &width2, &height2, 0, SOIL_LOAD_RGB);
+
+	glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, image2);
+
 	SOIL_free_image_data(image2);
+
+	glBindTexture(GL_TEXTURE_2D, 0);
+
+	//glGenerateMipmap(GL_TEXTURE_2D);
+	
 	
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -176,29 +208,42 @@ int main() {
 		////GL_CW sentido horario, GL_CCW sentido antihorario
 		glFrontFace(GL_CCW);
 
-
-		glActiveTexture(GL_TEXTURE0);
-
-		glUniform1f(glGetUniformLocation(shad.Program, "texture1"), 0);
-
-		glBindTexture(GL_TEXTURE_2D, textureID1);
-
-		glActiveTexture(GL_TEXTURE1);
-
-		glUniform1f(glGetUniformLocation(shad.Program, "texture2"), 1);
-
-		glBindTexture(GL_TEXTURE_2D, textureID2);
+		GLint locTex1 = glGetUniformLocation(shad.Program, "texture1");
+		GLint locTex2 = glGetUniformLocation(shad.Program, "texture2");
+		GLint mixID = glGetUniformLocation(shad.Program, "mixOp");
 
 		//establecer el shader
 		shad.USE();	
 
+		glUniform1f(mixID, mixOp);
+
+		glActiveTexture(GL_TEXTURE0);
+		glBindTexture(GL_TEXTURE_2D, textures[0]);
+		glUniform1i(locTex1, 0);
+
+		glActiveTexture(GL_TEXTURE1);
+		glBindTexture(GL_TEXTURE_2D, textures[1]);
+		glUniform1i(locTex2, 1);
+
 		glBindVertexArray(vao);
+
 
 		if (WIREFRAME) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 		else {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+		}
+
+		if (fade) {
+			if (mixOp >= 0 && mixOp<1) {
+				mixOp += 0.01f;
+			}
+		}
+		else {
+			if (mixOp>0.01f) {
+				mixOp -= 0.01f;
+			}
 		}
 
 		//pitar el VAO
@@ -214,12 +259,11 @@ int main() {
 	}
 	// // reset bindings for VAO, VBO and EBO and set free also with glDeleteVertexArrays()
 	
-	glBindVertexArray(0);
-	glBindBuffer(GL_ARRAY_BUFFER, 0);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+	// Terminate GLFW, clearing any resources allocated by GLFW.
+	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteVertexArrays(1, &vao);
-	glDeleteVertexArrays(1, &vbo);
-	glDeleteVertexArrays(1, &ebo);
+	glDeleteBuffers(1, &vbo);
+	//glDeleteVertexArrays(1, &ebo);
 
 	glfwDestroyWindow(window);
 	glfwTerminate();

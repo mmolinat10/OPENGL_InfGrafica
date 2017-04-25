@@ -4,9 +4,12 @@ out vec4 color;
 in vec2 frag_CoordTex;
 uniform sampler2D texture1;
 uniform sampler2D texture2;
+uniform float mixOp;
 
 
 void main()
 {
-	color = mix(texture(texture1, frag_CoordTex), texture(texture2, frag_CoordTex), 0.2);
+	vec4 colTexture1 = texture(texture1, frag_CoordTex);
+	vec4 colTexture2 = texture(texture2, frag_CoordTex);
+	color = mix(colTexture1, colTexture2, mixOp);
 }
