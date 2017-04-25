@@ -9,11 +9,11 @@ layout(location = 2) in vec2 texCoord;
 //Out values
 //out vec3 frag_color;
 out vec2 frag_CoordTex;
-
+uniform mat4 finalMatrix;
 
 void main(){
-    gl_Position.xyz = vertexPosition;
-	gl_Position.w = 1.0f;
+    gl_Position = finalMatrix*(vec4((vertexPosition),1));
+	
 	
 	frag_CoordTex = texCoord;
 

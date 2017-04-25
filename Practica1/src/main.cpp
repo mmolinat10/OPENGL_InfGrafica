@@ -7,7 +7,13 @@
 #include "Shader.h"
 #include <SOIL.h>
 
+#include <glm.hpp>
+#include <gtc/matrix_transform.hpp>
+#include <gtc/type_ptr.hpp>
+
+
 using namespace std;
+using namespace glm;
 
 
 const GLint WIDTH = 800, HEIGHT = 600;
@@ -18,6 +24,11 @@ const int sizeOfIndices = sizeof(int) * numIndices;
 GLuint textures[2];
 float mixOp;
 bool fade = false;
+mat4 matrix;
+GLint locTex1;
+GLint locTex2;
+GLint mixID;
+GLint matrixID;
 
 
 // Positions of vertices on CPU
@@ -208,9 +219,10 @@ int main() {
 		////GL_CW sentido horario, GL_CCW sentido antihorario
 		glFrontFace(GL_CCW);
 
-		GLint locTex1 = glGetUniformLocation(shad.Program, "texture1");
-		GLint locTex2 = glGetUniformLocation(shad.Program, "texture2");
-		GLint mixID = glGetUniformLocation(shad.Program, "mixOp");
+		locTex1 = glGetUniformLocation(shad.Program, "texture1");
+		locTex2 = glGetUniformLocation(shad.Program, "texture2");
+		mixID = glGetUniformLocation(shad.Program, "mixOp");
+		matrixID = glGetUniformLocation(shad.Program, "finalMatrix");
 
 		//establecer el shader
 		shad.USE();	
@@ -245,6 +257,12 @@ int main() {
 				mixOp -= 0.01f;
 			}
 		}
+
+		//orden: primero escalar, luego rotar y por último trasladar
+		matrix = scale(matrix, vec3(0.5f, -0.5f, 0.0f));
+		matrix = translate(matrix, vec3(0.5f, 0.5f, 0));
+
+		glUniformMatrix4fv(matrixID, 1, GL_FALSE, value_ptr(matrix));
 
 		//pitar el VAO
 		glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);
