@@ -1,0 +1,21 @@
+#version 330 core
+
+// Input vertex data, different for all executions of this shader.
+layout(location = 0) in vec3 vertexPosition;
+layout(location = 1) in vec3 vertexColor;
+layout(location = 2) in vec2 texCoord;
+
+
+//Out values
+//out vec3 frag_color;
+out vec2 frag_CoordTex;
+uniform mat4 finalMatrix;
+
+void main(){
+    gl_Position = finalMatrix*(vec4((vertexPosition),1));
+	
+	
+	frag_CoordTex = texCoord;
+
+}
+

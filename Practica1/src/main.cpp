@@ -27,8 +27,10 @@ bool fade = false;
 GLint locTex1;
 GLint locTex2;
 GLint mixID;
-GLint matrixID;
+GLint matrixPlaneID;
+GLint projID;
 uint directionRotate;
+vec3 cameraPos;
 
 
 // Positions of vertices on CPU
@@ -124,7 +126,7 @@ int main() {
 	//que funcion se llama cuando se detecta una pulsaci�n de tecla en la ventana x
 	glfwSetKeyCallback(window, key_callback);
 
-	Shader shad = Shader("./src/textureVertex.vertexshader", "./src/textureFragment.fragmentshader");
+	Shader shad = Shader("./src/textureVertex3d.vertexshader", "./src/textureFragment3d.fragmentshader");
 	GLuint vao, vbo, ebo;
 	
 	//cargamos los shader
@@ -200,6 +202,7 @@ int main() {
 
 	//glGenerateMipmap(GL_TEXTURE_2D);
 	
+	cameraPos = vec3(0.0f, 0.0f, -3.0f);
 	
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
@@ -232,7 +235,7 @@ int main() {
 		locTex1 = glGetUniformLocation(shad.Program, "texture1");
 		locTex2 = glGetUniformLocation(shad.Program, "texture2");
 		mixID = glGetUniformLocation(shad.Program, "mixOp");
-		matrixID = glGetUniformLocation(shad.Program, "finalMatrix");
+		matrixPlaneID = glGetUniformLocation(shad.Program, "finalMatrix");
 
 		//establecer el shader
 		shad.USE();	
@@ -257,6 +260,7 @@ int main() {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 		}
 
+
 		if (fade) {
 			if (mixOp >= 0 && mixOp<1) {
 				mixOp += 0.01f;
@@ -267,20 +271,33 @@ int main() {
 				mixOp -= 0.01f;
 			}
 		}
-		mat4 matrix;
+
+		mat4 projCamera;
+		projCamera = perspective(radians(70.f), (GLfloat)WIDTH / (GLfloat) HEIGHT, 0.1f, 100.0f);
+		mat4 posCamera;
+		posCamera = translate(posCamera, cameraPos);
+		mat4 matrixPlane;
+		
 		//en opengl el orden es: primero trasladar, luego rotar y por último scalar
-		matrix = translate(matrix, vec3(0.5f, 0.5f, 0));
+		
+		/*matrix = translate(matrix, vec3(0.5f, 0.5f, 0));
 		if (directionRotate == 1) {
 			matrix = rotate(matrix, (GLfloat)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		}
 		else if(directionRotate == 2) {
 			matrix = rotate(matrix, (GLfloat)glfwGetTime() * glm::radians(-50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
 		}
-		
+	
 		matrix = scale(matrix, vec3(0.5f, -0.5f, 0.0f));
-		
+		*/
+		matrixPlane = translate(matrixPlane, vec3(0.0f, -0.5f, 0.0f));
+		matrixPlane = rotate(matrixPlane, radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
 
-		glUniformMatrix4fv(matrixID, 1, GL_FALSE, value_ptr(matrix));
+		matrixPlane = projCamera * posCamera * matrixPlane;
+	
+		
+		glUniformMatrix4fv(matrixPlaneID, 1, GL_FALSE, value_ptr(matrixPlane));
+
 
 		//pitar el VAO
 		glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);

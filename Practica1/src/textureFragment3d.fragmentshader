@@ -1,0 +1,15 @@
+#version 330 core
+
+out vec4 color;
+in vec2 frag_CoordTex;
+uniform sampler2D texture1;
+uniform sampler2D texture2;
+uniform float mixOp;
+
+
+void main()
+{
+	vec4 colTexture1 = texture(texture1, frag_CoordTex);
+	vec4 colTexture2 = texture(texture2, frag_CoordTex);
+	color = mix(colTexture1, colTexture2, mixOp);
+}
