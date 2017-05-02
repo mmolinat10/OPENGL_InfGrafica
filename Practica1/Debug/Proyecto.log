@@ -1,2 +1,5 @@
-﻿  Proyecto.vcxproj -> C:\Users\mmolina\Documents\OPENGL_InfGrafica\Practica1\Debug\Practica1.exe
+﻿  main.cpp
+c:\users\mmolina\documents\opengl_infgrafica\practica1\src\main.cpp(416): warning C4244: 'initializing': conversion from 'double' to 'float', possible loss of data
+c:\users\mmolina\documents\opengl_infgrafica\practica1\src\main.cpp(417): warning C4244: '=': conversion from 'int' to 'float', possible loss of data
+  Proyecto.vcxproj -> C:\Users\mmolina\Documents\OPENGL_InfGrafica\Practica1\Debug\Practica1.exe
   Proyecto.vcxproj -> C:\Users\mmolina\Documents\OPENGL_InfGrafica\Practica1\Debug\Practica1.pdb (Full PDB)
