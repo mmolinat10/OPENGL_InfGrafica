@@ -16,8 +16,8 @@ public:
 	glm::mat4 LookAt();
 	GLfloat GetFOV();
 	GLboolean moveForward, moveBackwards, moveLeft, moveRight;
-	double Deltatime;
-	double Lastframe;
+	float Deltatime;
+	float Lastframe;
 	~Camera();
 private:
 	glm::vec3 cameraPos;

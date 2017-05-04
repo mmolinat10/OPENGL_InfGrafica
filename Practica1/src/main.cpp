@@ -11,6 +11,10 @@
 #include <glm.hpp>
 #include <gtc/matrix_transform.hpp>
 #include <gtc/type_ptr.hpp>
+#include <assimp/Importer.hpp>
+#include <assimp/scene.h>
+#include <assimp/postprocess.h>
+#include "Model.h"
 
 
 using namespace std;
@@ -19,7 +23,7 @@ using namespace glm;
 GLFWwindow* window;
 const GLuint WIDTH = 800, HEIGHT = 600;
 //const int floatsPerPosition = 3;
-bool WIREFRAME = false;
+/*bool WIREFRAME = false;
 const int numIndices = 6;
 const int sizeOfIndices = sizeof(int) * numIndices;
 GLuint textures[2];
@@ -28,15 +32,13 @@ bool fade = false;
 GLint locTex1;
 GLint locTex2;
 GLint mixID;
-//GLint matrixPlaneID;
-//uint directionRotate;
-float plusRot;
+float plusRot;*/
 
+/*
 bool plusRotRight, plusRotLeft, plusRotUp, plusRotDown;
-float rotX, rotY = 0.0f;
+float rotX, rotY = 0.0f;*/
 //camara
 Camera cam;
-/*bool moveForward, moveBackwards, moveRight, moveLeft;*/
 double mouseLastPosX, mouseLastPosY;
 bool start;
 float _pitch, _yaw;
@@ -50,33 +52,13 @@ float sensibility;
 float FOV = 60.0f;
 float cameraSpeed;
 static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
-/*void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
-
-void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
-void DoMovement(GLFWwindow* window);*/
-//mat4 miLookAt(vec3 position, vec3 target, vec3 worldUp);
 void PrintAndCompareMatrix(mat4 m1, mat4 m2);
 void PrintMatrix(mat4 m);
 void cursor_callback(GLFWwindow* window, double xPos, double yPos);
 
+int numModel;
+
 /*
-// Positions of vertices on CPU
-GLfloat VertexBufferObject[] = {
-	//geometry				//colors			//texture coords
-	  0.5f,  0.5f, 0.0f,	1.0f, 0.0f, 0.0f,	1.0f, 1.0f, //Top right
-	  0.5f, -0.5f, 0.0f,	0.0f, 1.0f, 0.0f,	1.0f, 0.0f, //Bottom right
-	 -0.5f, -0.5f, 0.0f,	0.0f, 0.0f, 1.0f,	0.0f, 0.0f, //Bottom left
-	 -0.5f, 0.5f, 0.0f,		1.0f, 1.0f, 0.0f,	0.0f, 1.0f	//Top left
-};
-
-// Indexes on CPU
-//(EBO)
-int indices[] = {
-	2, 0, 3,
-	1, 0, 2 };
-*/
-
 GLfloat VertexBufferCube[] = {
 	-0.5f, -0.5f, -0.5f,  0.0f, 0.0f,
 	0.5f , -0.5f, -0.5f,  1.0f, 0.0f,
@@ -133,7 +115,7 @@ vec3 CubesPositionBuffer[] = {
 	vec3(1.5f ,  0.2f, -1.5f),
 	vec3(-1.3f,  1.0f, -1.5f)
 };
-
+*/
 static void error_callback(int error, const char* description)
 {
 	fputs(description, stderr);
@@ -157,35 +139,6 @@ void mouseScrollWrapper(GLFWwindow *windowP, double xScroll, double yScroll)
 	}
 }
 
-/*
-mat4 miLookAt(vec3 position, vec3 target, vec3 worldUp) {
-	
-	vec3 zaxis = normalize(position - target);
-	
-	vec3 xaxis = normalize(cross(normalize(worldUp), zaxis));
-	
-	vec3 yaxis = cross(zaxis, xaxis);
-
-	mat4 translation, rotation; 
-	translation[3][0] = -position.x; 
-	translation[3][1] = -position.y;
-	translation[3][2] = -position.z;
-	translation[3][3] = 1;
-
-	rotation[0][0] = xaxis.x; 
-	rotation[1][0] = xaxis.y;
-	rotation[2][0] = xaxis.z;
-	rotation[0][1] = yaxis.x; 
-	rotation[1][1] = yaxis.y;
-	rotation[2][1] = yaxis.z;
-	rotation[0][2] = zaxis.x; 
-	rotation[1][2] = zaxis.y;
-	rotation[2][2] = zaxis.z;
-	rotation[3][3] = 1;
-
-	return rotation * translation;
-}*/
-
 void PrintMatrix(mat4 m) {
 
 	for (int i = 0; i < 4; i++) {
@@ -206,8 +159,8 @@ void PrintAndCompareMatrix(mat4 m1, mat4 m2) {
 	}
 }
 
-
 void cursor_callback(GLFWwindow* window, double xPos, double yPos) {
+	//cam.MouseMove(window, xPos, yPos);
 	double offsetX, offsetY;
 	if (!start) {
 		_yaw = 270.0f;
@@ -234,28 +187,11 @@ void cursor_callback(GLFWwindow* window, double xPos, double yPos) {
 
 	vec3 front;
 
-	front.x = cos(radians(_yaw)) * cos(radians(_pitch));
+	front.x = cos(radians(_pitch)) * cos(radians(_yaw));
 	front.y = sin(radians(_pitch));
-	front.z = sin(radians(_yaw)) * cos(radians(_pitch));
+	front.z = cos(radians(_pitch)) * sin(radians(_yaw));
 	cameraDir = normalize(front);
 }
-/*
-void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
-{
-	if (FOV >= 1.0f && FOV <= 60.0f)
-		FOV -= yoffset / 10;
-	if (FOV <= 1.0f)
-		FOV = 1.0f;
-	if (FOV >= 60.0f)
-		FOV = 60.0f;
-}*/
-/*
-void DoMovement(GLFWwindow* window) {
-	moveBackwards = glfwGetKey(window, GLFW_KEY_W);
-	moveForward = glfwGetKey(window, GLFW_KEY_S);
-	moveLeft = glfwGetKey(window, GLFW_KEY_A);
-	moveRight = glfwGetKey(window, GLFW_KEY_D);
-}*/
 
 int main() {
 	cameraPos = vec3(0, 0, 3);
@@ -265,8 +201,9 @@ int main() {
 	cameraRight = normalize(cross(vec3(0, 1, 0), cameraDir));
 	cameraUp = normalize(cross(cameraDir, cameraRight));
 	cam = Camera(cameraPos, cameraDir, sensibility, FOV);
-	mixOp = 0.0f;
-	plusRot = 0.25f;
+	numModel = 1;
+	/*mixOp = 0.0f;
+	plusRot = 0.25f;*/
 
 	glfwSetErrorCallback(error_callback);
 
@@ -319,16 +256,19 @@ int main() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	Shader shad = Shader("./src/textureVertex3d.vertexshader", "./src/textureFragment3d.fragmentshader");
-	GLuint vao, vbo/* ebo*/;
+	// Load models
+	Model ourModel1("./src/spider/spider.obj");
+	Model ourModel2("./src/Goku SS3/Goku SS3.obj");
+	Model ourModel3("./src/building/city3.obj");	
 	
-	//cargamos los shader
+	/*
+	GLuint vao, vbo;
+	
 
-	//practica wireframe
 	glGenVertexArrays(1, &vao); // Create new VAO
 								
 	glGenBuffers(1, &vbo); // Create new VBO
-						   // Create new buffer that will be used to store indices
-	//glGenBuffers(1, &ebo);
+						 
 			
 
 	glBindVertexArray(vao); {// Binded VAO will store connections between VBOs and attributes
@@ -336,22 +276,11 @@ int main() {
 											// initialize vertex buffer, allocate memory, fill it with data
 		glBufferData(GL_ARRAY_BUFFER, sizeof(VertexBufferCube), VertexBufferCube, GL_STATIC_DRAW);
 		
-		/*
-		// Bind index buffer to corresponding target
-
-		glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ebo);
-		// ititialize index buffer, allocate memory, fill it with data
-		glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeOfIndices, indices, GL_STATIC_DRAW);
-		*/
 
 		// indicate that current VBO should be used with vertex attribute with index 0
 		glEnableVertexAttribArray(0);
 		// indicate how vertex attribute 0 should interpret data in connected VBO
 		glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), 0);
-	
-		/*
-		glEnableVertexAttribArray(1);
-		glVertexAttribPointer(1, 0, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));*/
 
 		glEnableVertexAttribArray(1);
 		glVertexAttribPointer(1, 2, GL_FLOAT, GL_FALSE, 5 * sizeof(GLfloat), (GLvoid*)(3 * sizeof(GLfloat)));
@@ -402,7 +331,7 @@ int main() {
 	SOIL_free_image_data(image);
 
 	glBindTexture(GL_TEXTURE_2D, 0);
-
+	*/
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
 	{	
@@ -414,14 +343,14 @@ int main() {
 			cout << "Matriz Look Ok \n";
 		}*/
 
+		//comprueba que algun disparador se halla activado (tales como el teclado, raton, etc)
+		glfwPollEvents();
+
 		cam.DoMovement(window);
 
 		cam.Deltatime = glfwGetTime() - cam.Lastframe;
 
 		cam.Lastframe = glfwGetTime();
-
-		//comprueba que algun disparador se halla activado (tales como el teclado, raton, etc)
-		glfwPollEvents();
 
 		// Clear the colorbuffer
 		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
@@ -436,7 +365,7 @@ int main() {
 		////GL_CW sentido horario, GL_CCW sentido antihorario
 		glFrontFace(GL_CCW);
 		*/
-
+		/*
 		locTex1 = glGetUniformLocation(shad.Program, "texture1");
 		locTex2 = glGetUniformLocation(shad.Program, "texture2");
 		mixID = glGetUniformLocation(shad.Program, "mixOp");
@@ -450,7 +379,7 @@ int main() {
 		glActiveTexture(GL_TEXTURE1);
 		glBindTexture(GL_TEXTURE_2D, textures[1]);
 		glUniform1i(locTex2, 1);
-
+		*/
 		//establecer el shader
 		shad.USE();	
 
@@ -471,16 +400,23 @@ int main() {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(projLocation, 1, GL_FALSE, value_ptr(projection));
 
-		glBindVertexArray(vao);
+		mat4 model;
+		model = translate(model, vec3(0.0f, 0.0f, -20.f));
+		model = scale(model, vec3(0.2f, 0.2f, 0.2f));
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(model));
 
-		/*
-		if (WIREFRAME) {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+		if (numModel == 1) {
+			ourModel1.Draw(shad, 0);
 		}
-		else {
-			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}*/
+		else if (numModel == 2) {
+			ourModel2.Draw(shad, 0);
+		}
+		else if (numModel == 3) {
+			ourModel3.Draw(shad, 0);
+		}
 
+		//glBindVertexArray(vao);
+		/*
 		if (fade) {
 			if (mixOp >= 0 && mixOp<1) {
 				mixOp += 0.01f;
@@ -490,21 +426,21 @@ int main() {
 			if (mixOp>0.01f) {
 				mixOp -= 0.01f;
 			}
-		}
+		}*/
 
 		if (cam.moveForward) {
-			cameraPos.z -= normalize(cameraDir).z*cameraSpeed*cam.Deltatime;
+			cameraPos -= cameraDir*(cameraSpeed*cam.Deltatime);
 		}
-		else if (cam.moveBackwards) {
-			cameraPos.z += normalize(cameraDir).z*cameraSpeed*cam.Deltatime;
+		if (cam.moveBackwards) {
+			cameraPos += cameraDir*(cameraSpeed*cam.Deltatime);
 		}
 		if (cam.moveLeft) {
-			cameraPos.x += normalize(cameraRight).x*cameraSpeed*cam.Deltatime;
+			cameraPos.x += normalize(cameraRight).x*(cameraSpeed*cam.Deltatime);
 		}
-		else if (cam.moveRight) {
-			cameraPos.x -= normalize(cameraRight).x*cameraSpeed*cam.Deltatime;
+		if (cam.moveRight) {
+			cameraPos.x -= normalize(cameraRight).x*(cameraSpeed*cam.Deltatime);
 		}
-
+		/*
 		if (plusRotLeft) {
 			rotY -= plusRot;
 		}
@@ -517,8 +453,9 @@ int main() {
 		}
 		else if (plusRotDown) {
 			rotX += plusRot;
-		}
+		}*/
 
+		/*
 		for (GLuint i = 0; i < 10; i++)
 		{
 			// Calculate the model matrix for each object and pass it to shader before drawing
@@ -540,45 +477,20 @@ int main() {
 
 			glDrawArrays(GL_TRIANGLES, 0, 36);
 		}
-		//en opengl el orden es: primero trasladar, luego rotar y por último scalar
-		
-		/*matrix = translate(matrix, vec3(0.5f, 0.5f, 0));
-		if (directionRotate == 1) {
-			matrix = rotate(matrix, (GLfloat)glfwGetTime() * glm::radians(50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-		else if(directionRotate == 2) {
-			matrix = rotate(matrix, (GLfloat)glfwGetTime() * glm::radians(-50.0f), glm::vec3(0.0f, 0.0f, 1.0f));
-		}
-	
-		matrix = scale(matrix, vec3(0.5f, -0.5f, 0.0f));
-		*/
-		
-		/*matrixPlane = translate(matrixPlane, vec3(0.0f, -0.5f, 0.0f));
-		matrixPlane = rotate(matrixPlane, radians(50.0f), glm::vec3(1.0f, 0.0f, 0.0f));
-
-		matrixPlane = projCamera * posCamera * matrixPlane;
-	
-		
-		glUniformMatrix4fv(matrixPlaneID, 1, GL_FALSE, value_ptr(matrixPlane));
-
-
-		//pitar el VAO
-		glDrawElements(GL_TRIANGLES, numIndices, GL_UNSIGNED_INT, 0);*/
 
 		// reset bindings for VAO
 		glBindVertexArray(0);
-
+		*/
 		//intercambia el framebuffer
 		glfwSwapBuffers(window);
 		
 	}
-	// // reset bindings for VAO, VBO and EBO and set free also with glDeleteVertexArrays()
-	
+	//reset bindings for VAO, VBO and EBO and set free also with glDeleteVertexArrays()
+	/*
 	// Terminate GLFW, clearing any resources allocated by GLFW.
 	glBindTexture(GL_TEXTURE_2D, 0);
 	glDeleteVertexArrays(1, &vao);
-	glDeleteBuffers(1, &vbo);
-	//glDeleteVertexArrays(1, &ebo);
+	glDeleteBuffers(1, &vbo);*/
 
 	glfwDestroyWindow(window);
 	glfwTerminate();
@@ -593,21 +505,24 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
 
-	/*
-	//modo wireframe
-	if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == false) {
-	WIREFRAME = true;
+	if (key == GLFW_KEY_1&&action == GLFW_PRESS) {
+		numModel = 1;
 	}
 
-	//no wireframe
-	else if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == true) {
-	WIREFRAME = false;
-	}*/
+	else if (key == GLFW_KEY_2&&action == GLFW_PRESS) {
+		numModel = 2;
+	}
+	if (key == GLFW_KEY_3&&action == GLFW_PRESS) {
+		numModel = 3;
+	}
 
+
+
+	/*
 	if (key == GLFW_KEY_E&&action == GLFW_PRESS) {
 		PrintAndCompareMatrix(cam.LookAt(), mLook);
 	}
-
+	
 	if (key == GLFW_KEY_1&&action == GLFW_PRESS) {
 		fade = true;
 	}
@@ -643,13 +558,5 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 	else if (key == GLFW_KEY_LEFT&&action == GLFW_RELEASE) {
 		plusRotLeft = false;
-	}
-
-	/*
-	if (key == GLFW_KEY_LEFT&&action == GLFW_PRESS) {
-	directionRotate = 1;
-	}
-	else if (key == GLFW_KEY_RIGHT&&action == GLFW_PRESS) {
-	directionRotate = 2;
 	}*/
 }

@@ -37,20 +37,20 @@ void Camera::DoMovement(GLFWwindow *window) {
 
 }
 
-void Camera::MouseMove(GLFWwindow *window, double xpos, double ypos) {
+void Camera::MouseMove(GLFWwindow *window, double xPos, double yPos) {
 	double offsetX, offsetY;
 	if (!firstMouse) {
 		YAW = 270.0f;
 		PITCH = 0.0f;
 		firstMouse = true;
-		LastMx = xpos;
-		LastMy = ypos;
+		LastMx = xPos;
+		LastMy = yPos;
 	}
-	offsetX = xpos - LastMx;
-	offsetY = ypos - LastMy;
+	offsetX = xPos - LastMx;
+	offsetY = yPos - LastMy;
 
-	LastMx = xpos;
-	LastMy = ypos;
+	LastMx = xPos;
+	LastMy = yPos;
 
 
 	offsetX *= Sensitivity;
@@ -64,9 +64,9 @@ void Camera::MouseMove(GLFWwindow *window, double xpos, double ypos) {
 
 	glm::vec3 front;
 
-	front.x = cos(glm::radians(YAW)) * cos(glm::radians(PITCH));
+	front.x = cos(glm::radians(PITCH)) * cos(glm::radians(YAW));
 	front.y = sin(glm::radians(PITCH));
-	front.z = sin(glm::radians(YAW)) * cos(glm::radians(PITCH));
+	front.z = cos(glm::radians(PITCH)) * sin(glm::radians(YAW));
 	cameraFront = normalize(front);
 
 }
