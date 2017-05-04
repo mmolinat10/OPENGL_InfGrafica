@@ -5,6 +5,7 @@
 #include <GLFW\glfw3.h>
 #include <iostream>
 #include "Shader.h"
+#include "Camera.h"
 #include <SOIL.h>
 
 #include <glm.hpp>
@@ -15,7 +16,7 @@
 using namespace std;
 using namespace glm;
 
-
+GLFWwindow* window;
 const GLuint WIDTH = 800, HEIGHT = 600;
 //const int floatsPerPosition = 3;
 bool WIREFRAME = false;
@@ -30,9 +31,34 @@ GLint mixID;
 //GLint matrixPlaneID;
 //uint directionRotate;
 float plusRot;
-vec3 cameraPos;
+
 bool plusRotRight, plusRotLeft, plusRotUp, plusRotDown;
 float rotX, rotY = 0.0f;
+//camara
+Camera cam;
+/*bool moveForward, moveBackwards, moveRight, moveLeft;*/
+double mouseLastPosX, mouseLastPosY;
+bool start;
+float _pitch, _yaw;
+mat4 myLook;
+mat4 mLook;
+vec3 cameraPos;
+vec3 cameraDir;
+vec3 cameraRight;
+vec3 cameraUp;
+float sensibility;
+float FOV = 60.0f;
+float cameraSpeed;
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+/*void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode);
+
+void scroll_callback(GLFWwindow* window, double xOffset, double yOffset);
+void DoMovement(GLFWwindow* window);*/
+//mat4 miLookAt(vec3 position, vec3 target, vec3 worldUp);
+void PrintAndCompareMatrix(mat4 m1, mat4 m2);
+void PrintMatrix(mat4 m);
+void cursor_callback(GLFWwindow* window, double xPos, double yPos);
 
 /*
 // Positions of vertices on CPU
@@ -108,78 +134,139 @@ vec3 CubesPositionBuffer[] = {
 	vec3(-1.3f,  1.0f, -1.5f)
 };
 
-
 static void error_callback(int error, const char* description)
 {
 	fputs(description, stderr);
 }
 
-static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+void mousePosWrapper(GLFWwindow *windowP, double xpos, double ypos)
 {
-	//cuando se pulsa una tecla escape cerramos la aplicacion
-	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
-		glfwSetWindowShouldClose(window, GL_TRUE);
+	windowP = window;
+	if (&cam)
+	{
+		cam.MouseMove(windowP, xpos, ypos);
 	}
-
-	//modo wireframe
-	if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == false) {
-		WIREFRAME = true;
-	}
-
-	//no wireframe
-	else if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == true) {
-		WIREFRAME = false;
-	}
-
-
-	if (key == GLFW_KEY_1&&action == GLFW_PRESS) {
-		fade = true;
-	}
-	else if (key == GLFW_KEY_2&&action == GLFW_PRESS) {
-		fade = false;
-	}
-
-	if (key == GLFW_KEY_UP&&action == GLFW_PRESS) {
-		plusRotUp = true;
-	}
-
-	if (key == GLFW_KEY_UP&&action == GLFW_RELEASE) {
-		plusRotUp = false;
-	}
-
-	if (key == GLFW_KEY_DOWN&&action == GLFW_PRESS) {
-		plusRotDown = true;
-	}
-
-	if (key == GLFW_KEY_DOWN&&action == GLFW_RELEASE) {
-		plusRotDown = false;
-	}
-
-	if (key == GLFW_KEY_RIGHT&&action == GLFW_PRESS) {
-		plusRotRight = true;
-	}
-	else if (key == GLFW_KEY_RIGHT&&action == GLFW_RELEASE) {
-		plusRotRight = false;
-	}
-
-	if (key == GLFW_KEY_LEFT&&action == GLFW_PRESS) {
-		plusRotLeft = true;
-	}
-	else if (key == GLFW_KEY_LEFT&&action == GLFW_RELEASE) {
-		plusRotLeft = false;
-	}
-
-	/*
-	if (key == GLFW_KEY_LEFT&&action == GLFW_PRESS) {
-		directionRotate = 1;
-	}
-	else if (key == GLFW_KEY_RIGHT&&action == GLFW_PRESS) {
-		directionRotate = 2;
-	}*/
 }
 
+void mouseScrollWrapper(GLFWwindow *windowP, double xScroll, double yScroll)
+{
+	windowP = window;
+	if (&cam)
+	{
+		cam.MouseScroll(windowP, xScroll, yScroll);
+	}
+}
+
+/*
+mat4 miLookAt(vec3 position, vec3 target, vec3 worldUp) {
+	
+	vec3 zaxis = normalize(position - target);
+	
+	vec3 xaxis = normalize(cross(normalize(worldUp), zaxis));
+	
+	vec3 yaxis = cross(zaxis, xaxis);
+
+	mat4 translation, rotation; 
+	translation[3][0] = -position.x; 
+	translation[3][1] = -position.y;
+	translation[3][2] = -position.z;
+	translation[3][3] = 1;
+
+	rotation[0][0] = xaxis.x; 
+	rotation[1][0] = xaxis.y;
+	rotation[2][0] = xaxis.z;
+	rotation[0][1] = yaxis.x; 
+	rotation[1][1] = yaxis.y;
+	rotation[2][1] = yaxis.z;
+	rotation[0][2] = zaxis.x; 
+	rotation[1][2] = zaxis.y;
+	rotation[2][2] = zaxis.z;
+	rotation[3][3] = 1;
+
+	return rotation * translation;
+}*/
+
+void PrintMatrix(mat4 m) {
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			cout << "m[" << i << "][" << j << "] = " << m[i][j] << endl;
+
+		}
+	}
+}
+
+void PrintAndCompareMatrix(mat4 m1, mat4 m2) {
+
+	for (int i = 0; i < 4; i++) {
+		for (int j = 0; j < 4; j++) {
+			cout << "m1[" << i << "][" << j << "] = " << m1[i][j] << endl;
+			cout << "m2[" << i << "][" << j << "] = " << m2[i][j] << endl;
+		}
+	}
+}
+
+
+void cursor_callback(GLFWwindow* window, double xPos, double yPos) {
+	double offsetX, offsetY;
+	if (!start) {
+		_yaw = 270.0f;
+		_pitch = 0.0f;
+		start = true;
+		mouseLastPosX = xPos;
+		mouseLastPosY = yPos;
+	}
+	offsetX = xPos - mouseLastPosX;
+	offsetY = yPos - mouseLastPosY;
+
+	mouseLastPosX = xPos;
+	mouseLastPosY = yPos;
+
+
+	offsetX *= sensibility;
+	offsetY *= sensibility;
+
+	_yaw += offsetX;
+	_pitch -= offsetY;
+
+	_pitch = clamp(_pitch, -89.9f, 89.9f);
+	_yaw = mod(_yaw, 360.0f);
+
+	vec3 front;
+
+	front.x = cos(radians(_yaw)) * cos(radians(_pitch));
+	front.y = sin(radians(_pitch));
+	front.z = sin(radians(_yaw)) * cos(radians(_pitch));
+	cameraDir = normalize(front);
+}
+/*
+void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
+{
+	if (FOV >= 1.0f && FOV <= 60.0f)
+		FOV -= yoffset / 10;
+	if (FOV <= 1.0f)
+		FOV = 1.0f;
+	if (FOV >= 60.0f)
+		FOV = 60.0f;
+}*/
+/*
+void DoMovement(GLFWwindow* window) {
+	moveBackwards = glfwGetKey(window, GLFW_KEY_W);
+	moveForward = glfwGetKey(window, GLFW_KEY_S);
+	moveLeft = glfwGetKey(window, GLFW_KEY_A);
+	moveRight = glfwGetKey(window, GLFW_KEY_D);
+}*/
+
 int main() {
+	cameraPos = vec3(0, 0, 3);
+	sensibility = 0.04f;
+	cameraSpeed = 3.f;
+	cameraDir = normalize(vec3(0, 0, 0) - cameraPos);
+	cameraRight = normalize(cross(vec3(0, 1, 0), cameraDir));
+	cameraUp = normalize(cross(cameraDir, cameraRight));
+	cam = Camera(cameraPos, cameraDir, sensibility, FOV);
 	mixOp = 0.0f;
+	plusRot = 0.25f;
 
 	glfwSetErrorCallback(error_callback);
 
@@ -194,7 +281,7 @@ int main() {
 	glfwWindowHint(GLFW_RESIZABLE, GL_TRUE);
 
 	//create a window
-	GLFWwindow* window = glfwCreateWindow(WIDTH, HEIGHT, "Practica1_MarcMolina", NULL, NULL);
+	window = glfwCreateWindow(WIDTH, HEIGHT, "Practica1_MarcMolina", NULL, NULL);
 	if (!window)
 	{
 		cout << "Error al crear la ventana" << endl;
@@ -215,16 +302,21 @@ int main() {
 	int screenWithd, screenHeight;
 	glfwGetFramebufferSize(window, &screenWithd, &screenHeight);
 
+	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+
+	
+	glfwSetCursorPosCallback(window, cursor_callback);
+	glfwSetScrollCallback(window, mouseScrollWrapper);
 	//que funcion se llama cuando se detecta una pulsaci�n de tecla en la ventana x
 	glfwSetKeyCallback(window, key_callback);
 
 	
 	//set windows and viewport
 	glViewport(0, 0, screenWithd, screenHeight);
-	
+	glClear(GL_COLOR_BUFFER_BIT);
 
 	//fondo
-	glClearColor(0.0, 0.0, 1.0, 1.0);
+	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	Shader shad = Shader("./src/textureVertex3d.vertexshader", "./src/textureFragment3d.fragmentshader");
 	GLuint vao, vbo/* ebo*/;
@@ -311,13 +403,23 @@ int main() {
 
 	glBindTexture(GL_TEXTURE_2D, 0);
 
-	cameraPos = vec3(0, 0, -3);
-
-	plusRot = 0.25f;
-
 	//bucle de dibujado
 	while (!glfwWindowShouldClose(window))
 	{	
+		myLook = cam.LookAt();
+
+		mLook = lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
+
+		/*if (myLook == mLook) {
+			cout << "Matriz Look Ok \n";
+		}*/
+
+		cam.DoMovement(window);
+
+		cam.Deltatime = glfwGetTime() - cam.Lastframe;
+
+		cam.Lastframe = glfwGetTime();
+
 		//comprueba que algun disparador se halla activado (tales como el teclado, raton, etc)
 		glfwPollEvents();
 
@@ -357,8 +459,9 @@ int main() {
 
 		mat4 view;
 		mat4 projection;
-		view = translate(view, cameraPos);
-		projection = perspective(radians(60.0f), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+		//view = translate(view, cameraPos);
+		projection = perspective(radians(cam.GetFOV()), (GLfloat)WIDTH / (GLfloat)HEIGHT, 0.1f, 100.0f);
+		view = lookAt(cameraPos, cameraPos + cameraDir, cameraUp);
 
 		GLint modelLocation = glGetUniformLocation(shad.Program, "model");
 		GLint viewLocation = glGetUniformLocation(shad.Program, "view");
@@ -370,13 +473,13 @@ int main() {
 
 		glBindVertexArray(vao);
 
-
+		/*
 		if (WIREFRAME) {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 		}
 		else {
 			glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-		}
+		}*/
 
 		if (fade) {
 			if (mixOp >= 0 && mixOp<1) {
@@ -387,6 +490,19 @@ int main() {
 			if (mixOp>0.01f) {
 				mixOp -= 0.01f;
 			}
+		}
+
+		if (cam.moveForward) {
+			cameraPos.z -= normalize(cameraDir).z*cameraSpeed*cam.Deltatime;
+		}
+		else if (cam.moveBackwards) {
+			cameraPos.z += normalize(cameraDir).z*cameraSpeed*cam.Deltatime;
+		}
+		if (cam.moveLeft) {
+			cameraPos.x += normalize(cameraRight).x*cameraSpeed*cam.Deltatime;
+		}
+		else if (cam.moveRight) {
+			cameraPos.x -= normalize(cameraRight).x*cameraSpeed*cam.Deltatime;
 		}
 
 		if (plusRotLeft) {
@@ -470,3 +586,70 @@ int main() {
 
 }
 
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mode)
+{
+	//cuando se pulsa una tecla escape cerramos la aplicacion
+	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
+		glfwSetWindowShouldClose(window, GL_TRUE);
+	}
+
+	/*
+	//modo wireframe
+	if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == false) {
+	WIREFRAME = true;
+	}
+
+	//no wireframe
+	else if (key == GLFW_KEY_W && action == GLFW_PRESS && WIREFRAME == true) {
+	WIREFRAME = false;
+	}*/
+
+	if (key == GLFW_KEY_E&&action == GLFW_PRESS) {
+		PrintAndCompareMatrix(cam.LookAt(), mLook);
+	}
+
+	if (key == GLFW_KEY_1&&action == GLFW_PRESS) {
+		fade = true;
+	}
+	else if (key == GLFW_KEY_2&&action == GLFW_PRESS) {
+		fade = false;
+	}
+
+	if (key == GLFW_KEY_UP&&action == GLFW_PRESS) {
+		plusRotUp = true;
+	}
+
+	if (key == GLFW_KEY_UP&&action == GLFW_RELEASE) {
+		plusRotUp = false;
+	}
+
+	if (key == GLFW_KEY_DOWN&&action == GLFW_PRESS) {
+		plusRotDown = true;
+	}
+
+	if (key == GLFW_KEY_DOWN&&action == GLFW_RELEASE) {
+		plusRotDown = false;
+	}
+
+	if (key == GLFW_KEY_RIGHT&&action == GLFW_PRESS) {
+		plusRotRight = true;
+	}
+	else if (key == GLFW_KEY_RIGHT&&action == GLFW_RELEASE) {
+		plusRotRight = false;
+	}
+
+	if (key == GLFW_KEY_LEFT&&action == GLFW_PRESS) {
+		plusRotLeft = true;
+	}
+	else if (key == GLFW_KEY_LEFT&&action == GLFW_RELEASE) {
+		plusRotLeft = false;
+	}
+
+	/*
+	if (key == GLFW_KEY_LEFT&&action == GLFW_PRESS) {
+	directionRotate = 1;
+	}
+	else if (key == GLFW_KEY_RIGHT&&action == GLFW_PRESS) {
+	directionRotate = 2;
+	}*/
+}
