@@ -258,8 +258,8 @@ int main() {
 	Shader shad = Shader("./src/textureVertex3d.vertexshader", "./src/textureFragment3d.fragmentshader");
 	// Load models
 	Model ourModel1("./src/spider/spider.obj");
-	Model ourModel2("./src/Goku SS3/Goku SS3.obj");
-	Model ourModel3("./src/building/city3.obj");	
+	Model ourModel2("./src/nanosuit/nanosuit.obj");
+	Model ourModel3("./src/ath/colchoneta.obj");	
 	
 	/*
 	GLuint vao, vbo;
