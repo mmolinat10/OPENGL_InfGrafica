@@ -56,7 +56,7 @@ void PrintAndCompareMatrix(mat4 m1, mat4 m2);
 void PrintMatrix(mat4 m);
 void cursor_callback(GLFWwindow* window, double xPos, double yPos);
 
-int numModel;
+//int numModel;
 
 /*
 GLfloat VertexBufferCube[] = {
@@ -201,7 +201,7 @@ int main() {
 	cameraRight = normalize(cross(vec3(0, 1, 0), cameraDir));
 	cameraUp = normalize(cross(cameraDir, cameraRight));
 	cam = Camera(cameraPos, cameraDir, sensibility, FOV);
-	numModel = 1;
+	//numModel = 1;
 	/*mixOp = 0.0f;
 	plusRot = 0.25f;*/
 
@@ -256,10 +256,11 @@ int main() {
 	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
 
 	Shader shad = Shader("./src/textureVertex3d.vertexshader", "./src/textureFragment3d.fragmentshader");
+	/*
 	// Load models
 	Model ourModel1("./src/spider/spider.obj");
 	Model ourModel2("./src/nanosuit/nanosuit.obj");
-	Model ourModel3("./src/ath/colchoneta.obj");	
+	Model ourModel3("./src/ath/colchoneta.obj");	*/
 	
 	/*
 	GLuint vao, vbo;
@@ -400,7 +401,7 @@ int main() {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(projLocation, 1, GL_FALSE, value_ptr(projection));
 
-		mat4 model;
+		/*mat4 model;
 		model = translate(model, vec3(0.0f, 0.0f, -20.f));
 		model = scale(model, vec3(0.2f, 0.2f, 0.2f));
 		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(model));
@@ -413,7 +414,7 @@ int main() {
 		}
 		else if (numModel == 3) {
 			ourModel3.Draw(shad, 0);
-		}
+		}*/
 
 		//glBindVertexArray(vao);
 		/*
@@ -504,7 +505,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS) {
 		glfwSetWindowShouldClose(window, GL_TRUE);
 	}
-
+	/*
 	if (key == GLFW_KEY_1&&action == GLFW_PRESS) {
 		numModel = 1;
 	}
@@ -514,7 +515,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 	}
 	if (key == GLFW_KEY_3&&action == GLFW_PRESS) {
 		numModel = 3;
-	}
+	}*/
 
 
 
