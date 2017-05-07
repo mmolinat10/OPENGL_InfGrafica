@@ -1,9 +1,1 @@
-﻿  main.cpp
-c:\users\mmolina\documents\opengl_infgrafica\practica1\src\main.cpp(182): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-c:\users\mmolina\documents\opengl_infgrafica\practica1\src\main.cpp(183): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-c:\users\mmolina\documents\opengl_infgrafica\practica1\src\main.cpp(352): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\mmolina\documents\opengl_infgrafica\practica1\src\main.cpp(354): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-  Object.cpp
-  Generating Code...
-c:\users\mmolina\documents\opengl_infgrafica\practica1\src\object.cpp(70): error C4716: 'Object::GetModelMatrix': must return a value
-c:\users\mmolina\documents\opengl_infgrafica\practica1\src\object.cpp(74): error C4716: 'Object::GetPosition': must return a value
+﻿  Proyecto.vcxproj -> C:\Users\Marc\Documents\OPENGL_InfGrafica\Practica1\Debug\Practica1.exe

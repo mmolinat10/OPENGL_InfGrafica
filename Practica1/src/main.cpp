@@ -15,6 +15,7 @@
 #include <assimp/scene.h>
 #include <assimp/postprocess.h>
 #include "Model.h"
+#include "Object.h"
 
 
 using namespace std;
@@ -55,6 +56,7 @@ static void key_callback(GLFWwindow* window, int key, int scancode, int action, 
 void PrintAndCompareMatrix(mat4 m1, mat4 m2);
 void PrintMatrix(mat4 m);
 void cursor_callback(GLFWwindow* window, double xPos, double yPos);
+
 
 //int numModel;
 
@@ -253,9 +255,12 @@ int main() {
 	glClear(GL_COLOR_BUFFER_BIT);
 
 	//fondo
-	glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+	glClearColor(0.f, 0.f, 0.f, 1.0f);
 
 	Shader shad = Shader("./src/textureVertex3d.vertexshader", "./src/textureFragment3d.fragmentshader");
+	Object A = Object(vec3(0.4f, 0.4f, 0.4f), vec3(0.f, 0.f, 0.f), vec3(0.f, 0.f, 0.f), Object::cube);
+	Object B = Object(vec3(0.1f, 0.1f, 0.1f), vec3(0.f, 0.f, 0.f), vec3(1.5f, 0.f, 0.f), Object::cube);
+
 	/*
 	// Load models
 	Model ourModel1("./src/spider/spider.obj");
@@ -348,13 +353,14 @@ int main() {
 		glfwPollEvents();
 
 		cam.DoMovement(window);
+		A.DoMoveAndRot(window);
 
 		cam.Deltatime = glfwGetTime() - cam.Lastframe;
 
 		cam.Lastframe = glfwGetTime();
 
 		// Clear the colorbuffer
-		glClearColor(0.2f, 0.3f, 0.3f, 1.0f);
+		glClearColor(0.f, 0.f, 0.f, 1.0f);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 		glEnable(GL_DEPTH_TEST);
 
@@ -401,6 +407,12 @@ int main() {
 		glUniformMatrix4fv(viewLocation, 1, GL_FALSE, value_ptr(view));
 		glUniformMatrix4fv(projLocation, 1, GL_FALSE, value_ptr(projection));
 
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(A.GetModelMatrix()));
+		A.Draw();
+
+		glUniformMatrix4fv(modelLocation, 1, GL_FALSE, value_ptr(B.GetModelMatrix()));
+		B.Draw();
+
 		/*mat4 model;
 		model = translate(model, vec3(0.0f, 0.0f, -20.f));
 		model = scale(model, vec3(0.2f, 0.2f, 0.2f));
@@ -441,6 +453,7 @@ int main() {
 		if (cam.moveRight) {
 			cameraPos.x -= normalize(cameraRight).x*(cameraSpeed*cam.Deltatime);
 		}
+		A.MoveAndRot(cam.Deltatime);
 		/*
 		if (plusRotLeft) {
 			rotY -= plusRot;

@@ -83,7 +83,9 @@ Object::Object(vec3 scal, vec3 rot, vec3 pos, FigureType typef) {
 	position = pos;
 	rotation = rot;
 	scale = scal;
-
+	moveUp = moveDown = moveRight = moveLeft = false;
+	rotateUp = rotateDown = rotateRight = rotateLeft = false;
+	plusRot = 50.f;
 }
 
 
@@ -105,12 +107,63 @@ void Object::Scale(vec3 scal) {
 	scale = scal;
 }
 
+
+void Object::MoveAndRot(float deltaTime) {
+	if (moveUp) {
+		Move(vec3(0.0f, 1.f * deltaTime, 0.0f));
+	}
+	if (moveDown) {
+		Move(vec3(0.0f, -1.f * deltaTime, 0.0f));
+	}
+	if (moveLeft) {
+		Move(vec3(-1.0f * deltaTime, 0.0f, 0.0f));
+	}
+	if (moveRight) {
+		Move(vec3(1.0f * deltaTime, 0.0f, 0.0f));
+	}
+
+	if (rotateUp) {
+		Rotate(vec3(-plusRot * deltaTime, 0.0f, 0.0f));
+	}
+	if (rotateDown) {
+		Rotate(vec3(plusRot * deltaTime, 0.0f, 0.0f));
+	}
+	if (rotateLeft) {
+		Rotate(vec3(0.0f, -plusRot * deltaTime, 0.0f));
+	}
+	if (rotateRight) {
+		Rotate(vec3(0.0f, plusRot * deltaTime, 0.0f));
+	}
+	
+}
+
+void Object::DoMoveAndRot(GLFWwindow *window) {
+	moveUp = glfwGetKey(window, GLFW_KEY_I);
+	moveDown = glfwGetKey(window, GLFW_KEY_K);
+	moveLeft = glfwGetKey(window, GLFW_KEY_J);
+	moveRight = glfwGetKey(window, GLFW_KEY_L);
+	rotateUp = glfwGetKey(window, GLFW_KEY_KP_8);
+	rotateDown = glfwGetKey(window, GLFW_KEY_KP_2);
+	rotateLeft = glfwGetKey(window, GLFW_KEY_KP_4);
+	rotateRight = glfwGetKey(window, GLFW_KEY_KP_6);
+
+}
+
 mat4 Object::GetModelMatrix() {
+	
+	if (rotation.x >= 360)
+		rotation.x = glm::mod(rotation.x, 360.f);
+	if (rotation.x <= (-360))
+		rotation.x = glm::mod(rotation.x, (-360.f));
+	if (rotation.y >= 360)
+		rotation.y = glm::mod(rotation.y, 360.f);
+	if (rotation.y <= (-360))
+		rotation.y = glm::mod(rotation.y, (-360.f));
+	
 	mat4 matrixModel;
 	matrixModel = glm::translate(matrixModel, GetPosition());
 	matrixModel = glm::rotate(matrixModel, glm::radians(rotation.x), vec3(1.0, 0.0, 0.0));
 	matrixModel = glm::rotate(matrixModel, glm::radians(rotation.y), vec3(0.0, 1.0, 0.0));
-	matrixModel = glm::rotate(matrixModel, glm::radians(rotation.z), vec3(0.0, 0.0, 1.0));
 	matrixModel = glm::scale(matrixModel, scale);
 	return matrixModel;
 }
