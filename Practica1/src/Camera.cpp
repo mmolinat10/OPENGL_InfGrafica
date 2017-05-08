@@ -33,6 +33,17 @@ glm::vec3 Camera::GetCamPos() {
 	return cameraPos;
 }
 
+glm::vec3 Camera::GetCamFront() {
+	return cameraFront;
+}
+
+glm::vec3 Camera::GetCamRight() {
+	return cameraRight;
+}
+
+glm::vec3 Camera::GetCamUp() {
+	return cameraUp;
+}
 
 void Camera::DoMovement(GLFWwindow *window) {
 	moveBackwards = glfwGetKey(window, GLFW_KEY_W);

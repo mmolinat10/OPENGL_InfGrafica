@@ -1,8 +1,12 @@
 ﻿  main.cpp
-c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(111): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
-c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(112): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
-c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(209): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
-c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(211): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(112): warning C4244: '+=': conversion from 'double' to 'float', possible loss of data
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(113): warning C4244: '-=': conversion from 'double' to 'float', possible loss of data
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(214): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(216): warning C4244: '=': conversion from 'double' to 'float', possible loss of data
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(283): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(284): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(310): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
+c:\users\marc\documents\opengl_infgrafica\practica1\src\main.cpp(311): warning C4305: 'argument': truncation from 'double' to 'GLfloat'
 LINK : warning LNK4098: defaultlib 'LIBCMT' conflicts with use of other libs; use /NODEFAULTLIB:library
 LINK : warning LNK4098: defaultlib 'MSVCRT' conflicts with use of other libs; use /NODEFAULTLIB:library
 Mesh.obj : warning LNK4049: locally defined symbol ___glewActiveTexture imported

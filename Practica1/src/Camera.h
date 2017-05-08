@@ -15,6 +15,9 @@ public:
 	void MouseScroll(GLFWwindow *window, double xScroll, double yScroll);
 	glm::mat4 LookAt();
 	glm::vec3 GetCamPos();
+	glm::vec3 GetCamFront();
+	glm::vec3 GetCamRight();
+	glm::vec3 GetCamUp();
 	GLfloat GetFOV();
 	GLboolean moveForward, moveBackwards, moveLeft, moveRight;
 	float Deltatime;
