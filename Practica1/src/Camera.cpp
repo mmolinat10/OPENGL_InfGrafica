@@ -29,6 +29,11 @@ GLfloat Camera::GetFOV() {
 	return FOV;
 }
 
+glm::vec3 Camera::GetCamPos() {
+	return cameraPos;
+}
+
+
 void Camera::DoMovement(GLFWwindow *window) {
 	moveBackwards = glfwGetKey(window, GLFW_KEY_W);
 	moveForward = glfwGetKey(window, GLFW_KEY_S);
